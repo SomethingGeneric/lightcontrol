@@ -1,0 +1,48 @@
+#!/bin/env python3
+
+import sys,random
+
+from lifxlan import *
+
+lan = LifxLAN(1)
+
+light = Light("d0:73:d5:03:58:0d", "10.0.0.32")
+
+cmd = sys.argv[1]
+
+colors = {
+    "red": RED,
+    "orange": ORANGE,
+    "yellow": YELLOW,
+    "green": GREEN,
+    "cyan": CYAN,
+    "blue": BLUE,
+    "purple": PURPLE,
+    "pink": PINK,
+    "crystal": [50972, 65535, 65535, 4000],
+    "reset": [50959, 0, 65535, 3500],
+}
+
+def ssl(stat):
+    with open(".light_current", "w") as f:
+        f.write(stat)
+
+ran = False
+while not ran:
+    try:
+        if cmd == "off":
+            light.set_power(False)
+        elif cmd == "on":
+            light.set_power(True)
+        elif cmd in colors:
+            light.set_color(colors[cmd])
+            ssl(cmd)
+        elif cmd == "random":
+            c = random.choice(list(colors.values()))
+            light.set_color(c)
+            ssl(list(colors.keys())[list(colors.values()).index(c)])
+        elif cmd == "show":
+            print(str(light.get_color()))
+        ran = True
+    except Exception as e:
+        print("Failed: " + str(e))
